@@ -1,3 +1,6 @@
+let tableData;
+let searchCountryLoading = false
+
 function createTextInput(id, placeholder) {
 	const textInput = document.createElement('input');
 	textInput.type = "text"
@@ -36,13 +39,12 @@ function setupSearch() {
 
 	var searchStatus = document.createElement('span');
 	searchStatus.id = 'search-status';
-	searchLabel.appendChild(searchStatus)
 
 	filtersContainer.appendChild(searchLabel)
 	filtersContainer.appendChild(searchLabelCountry)
 
 	var companiesHeading = document.querySelector('h2#companies');
-
+	companiesHeading.appendChild(searchStatus)
 	insertNodeBetween(companiesHeading, companiesHeading.nextSibling, filtersContainer)
 
 	var searchExplanation = document.createElement('p');
@@ -63,6 +65,8 @@ function setupSearch() {
 			return;
 		}
 
+		console.log(searchData)
+
 		var searchValue = searchCompanyInput.value
 			.replace(/[^a-z0-9_']+/gi, ' ')
 			.trim()
@@ -81,13 +85,16 @@ function setupSearch() {
 			})
 			.filter(Boolean)
 			.join(' ');
+
 		var allMatch = !searchValue;
 		var searchResults = searchValue ? searchIndex.search(searchValue) : [];
+		
 		var searchDisplayValue = (
 			searchValue === '+_incomplete'
 				? 'Incomplete profile'
 				: searchCompanyInput.value.trim()
 		);
+
 		if (allMatch) {
 			searchStatus.innerHTML = (
 				'Empty search; showing all '
@@ -102,22 +109,28 @@ function setupSearch() {
 				+ searchResults.length + ' results'
 			);
 		}
+
 		var searchMatches = {};
 		searchResults.forEach(function (r) {
 			searchMatches[+r.ref] = r;
 		});
+		
 		if (window.console && console.log) {
 			console.log('search', { value: searchValue, results: searchResults });
 		}
+		
 		searchData.textData.forEach(function (company, index) {
 			var match = searchMatches[index];
 			var row = document.getElementById('company-row-' + index);
 			var rowMatch = row.nextElementSibling;
+			
 			if (rowMatch && rowMatch.classList.contains('company-match')) {
 				rowMatch.parentNode.removeChild(rowMatch);
 			}
+			
 			row.style.display = (match || allMatch ? '' : 'none');
 			row.classList.remove('has-match');
+
 			if (match) {
 				row.classList.add('has-match');
 				var metadata = match.matchData.metadata;
@@ -144,6 +157,7 @@ function setupSearch() {
 				var words = [];
 				var currentWord = '';
 				var i, inWord, c;
+
 				for (i = pos[0] - 1; i >= 0; i--) {
 					c = text.substring(i, i + 1);
 					inWord = /\S/.test(c);
@@ -159,6 +173,7 @@ function setupSearch() {
 						}
 					}
 				}
+
 				spanBefore.innerText = (
 					(window.innerWidth > 600 ? searchData.headings[k2] + ': ' : '')
 					+ words.join(' ')
@@ -195,6 +210,36 @@ function setupSearch() {
 			}
 		});
 	}
+
+	searchCountryInput.addEventListener('focus', () => {
+		if(!tableData || searchCountryLoading) return;
+		console.log(tableData)
+		searchCountryLoading = true
+
+		let countryRequest = new XMLHttpRequest();
+		countryRequest.open('GET', searchIndexFilename)
+		countryRequest.onprogress = (e) => {
+			let loadPorcentage
+			if(e.lengthComputable){
+				loadPorcentage = Math.round(100 * e.loaded / e.total)
+			}else {
+				loadPorcentage = Math.min(100, Math.round(100 * e.loaded / searchIndexSize))
+			}
+
+			searchCountryStatus.innerHTML = `Loading countries data... ${loadPorcentage}%`
+		}
+		countryRequest.onload = function () {
+			searchCountryLoading = false;
+			if (xhr.status === 200) {
+				tableData = JSON.parse(xhr.response);
+				searchIndex = lunr.Index.load(tableData.index);
+				updateSearch();
+			} else {
+				searchCountryStatus.innerHTML = 'Error!';
+			}
+		};
+		countryRequest.send()
+	})
 
 	searchCompanyInput.addEventListener('focus', function () {
 		if (searchData || searchLoading) {
