@@ -7,6 +7,10 @@ function createTextInput(id, placeholder) {
 	return textInput
 }
 
+function insertNodeBetween(nodeA, nodeB, newNode) {
+	nodeA.parentNode.insertBefore(newNode, nodeB)
+}
+
 function setupSearch() {
 	var table = document.querySelector('table#companies-table');
 
@@ -26,7 +30,7 @@ function setupSearch() {
 
 	var companiesHeading = document.querySelector('h2#companies');
 
-	companiesHeading.parentNode.insertBefore(FilterContainer, companiesHeading.nextSibling)
+	insertNodeBetween(companiesHeading, companiesHeading.nextSibling, FilterContainer)
 
 	var searchExplanation = document.createElement('p');
 	searchExplanation.id = 'search-explanation';
