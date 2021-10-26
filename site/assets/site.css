@@ -55,7 +55,7 @@ h1.company-name {
 }
 
 #filters input[type="text"] {
-  margin-bottom: 4px;
+  margin-bottom: 10px;
 }
 
 #filter-input {
@@ -86,6 +86,16 @@ h1.company-name {
   font-style: italic;
   font-size: 15px;
   line-height: 18px;
+}
+
+.filter-input-label {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.search-input-label {
+  display: flex;
+  justify-content: flex-start;
 }
 
 @media screen and (min-width: 50em) {

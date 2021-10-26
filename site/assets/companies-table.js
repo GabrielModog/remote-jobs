@@ -7,6 +7,15 @@ function createTextInput(id, placeholder) {
 	return textInput
 }
 
+function createLabel(id, labelText) {
+	const labelElement = document.createElement("label")
+	labelElement.className = `${id}-label`
+	labelElement.setAttribute("for", id);
+	labelElement.appendChild(document.createTextNode(labelText));
+
+	return labelElement
+}
+
 function insertNodeBetween(nodeA, nodeB, newNode) {
 	nodeA.parentNode.insertBefore(newNode, nodeB)
 }
@@ -14,23 +23,27 @@ function insertNodeBetween(nodeA, nodeB, newNode) {
 function setupSearch() {
 	var table = document.querySelector('table#companies-table');
 
-	var FilterContainer = document.createElement('div')
-	FilterContainer.id = "filters"
+	var filtersContainer = document.createElement('div')
+	filtersContainer.id = "filters"
 
+	var searchLabel = createLabel('search-input', 'Search by company')
+	var searchCompanyInput = createTextInput('search-input', 'Search company');
+	searchLabel.appendChild(searchCompanyInput)
 
-	var searchInput = createTextInput('search-input', 'Search company');
-	var searchCountry = createTextInput('filter-input', 'Search country');
+	var searchLabelCountry = createLabel('filter-input', 'Search by country')
+	var searchCountryInput = createTextInput('filter-input', 'Search country');
+	searchLabelCountry.appendChild(searchCountryInput)
 
 	var searchStatus = document.createElement('span');
 	searchStatus.id = 'search-status';
+	searchLabel.appendChild(searchStatus)
 
-	FilterContainer.appendChild(searchInput)
-	FilterContainer.appendChild(searchStatus)
-	FilterContainer.appendChild(searchCountry)
+	filtersContainer.appendChild(searchLabel)
+	filtersContainer.appendChild(searchLabelCountry)
 
 	var companiesHeading = document.querySelector('h2#companies');
 
-	insertNodeBetween(companiesHeading, companiesHeading.nextSibling, FilterContainer)
+	insertNodeBetween(companiesHeading, companiesHeading.nextSibling, filtersContainer)
 
 	var searchExplanation = document.createElement('p');
 	searchExplanation.id = 'search-explanation';
@@ -50,7 +63,7 @@ function setupSearch() {
 			return;
 		}
 
-		var searchValue = searchInput.value
+		var searchValue = searchCompanyInput.value
 			.replace(/[^a-z0-9_']+/gi, ' ')
 			.trim()
 			.split(' ')
@@ -73,7 +86,7 @@ function setupSearch() {
 		var searchDisplayValue = (
 			searchValue === '+_incomplete'
 				? 'Incomplete profile'
-				: searchInput.value.trim()
+				: searchCompanyInput.value.trim()
 		);
 		if (allMatch) {
 			searchStatus.innerHTML = (
@@ -183,7 +196,7 @@ function setupSearch() {
 		});
 	}
 
-	searchInput.addEventListener('focus', function () {
+	searchCompanyInput.addEventListener('focus', function () {
 		if (searchData || searchLoading) {
 			return;
 		}
@@ -223,7 +236,7 @@ function setupSearch() {
 		xhr.send();
 	});
 
-	searchInput.addEventListener('keyup', function () {
+	searchCompanyInput.addEventListener('keyup', function () {
 		if (updateTimeout) {
 			clearTimeout(updateTimeout);
 		}
