@@ -1,19 +1,21 @@
+function createTextInput(id, placeholder) {
+	const textInput = document.createElement('input');
+	textInput.type = "text"
+	textInput.id = id
+	textInput.placeholder = placeholder
+
+	return textInput
+}
+
 function setupSearch() {
 	var table = document.querySelector('table#companies-table');
 
 	var FilterContainer = document.createElement('div')
 	FilterContainer.id = "filters"
 
-	var searchInput = document.createElement('input');
-	searchInput.type = 'text';
-	searchInput.placeholder = 'Search company';
-	searchInput.id = 'search-input';
 
-	var searchCountry = document.createElement('input')
-	searchCountry.type = 'text'
-	searchCountry.placeholder = 'Search country'
-	searchCountry.id = 'filter-input'
-
+	var searchInput = createTextInput('search-input', 'Search company');
+	var searchCountry = createTextInput('filter-input', 'Search country');
 
 	var searchStatus = document.createElement('span');
 	searchStatus.id = 'search-status';
